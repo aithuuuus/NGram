@@ -6,7 +6,7 @@ from torch import nn
 import torch.nn.functional as F
 
 class Decoder(nn.Module):
-    '''MLP that map embedding to one-hot, and number representations'''
+    '''MLP that map embedding to probability of the next word'''
     def __init__(
         self, 
         v_size, 
@@ -29,14 +29,24 @@ class Decoder(nn.Module):
         ]
         # from https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
         m = [i for l in m for i in l]
-        m[-1] = nn.Softmax()
+        m[-1] = nn.Softmax(dim=-1)
 
         self.model = nn.Sequential(*m)
         self.model = self.model.to(self.device)
 
     def forward(self, x):
-        pass
+        '''Map: tensor(B, E) -> tensor(B, V)'''
+        x = x.to(self.device)
+        x = self.model(x)
+        return x
+
 
 
 if __name__ == '__main__':
+    x = torch.tensor([
+        [1, 0], 
+        [0, 0], 
+        [0, 0]], dtype=torch.float32)
+
     d = Decoder(2, 2)
+    print(d(x))
