@@ -1,3 +1,5 @@
+import numpy as np
+
 def load(corpus, tokenizer):
     '''
     load and prepare the training dataset
@@ -9,7 +11,6 @@ def load(corpus, tokenizer):
 
     # tokenization
     if tokenizer == 'character':
-        import ipdb; ipdb.set_trace()
         corpus = list(corpus)
         vocabs = sorted(list(set(corpus)))
         v_size = len(vocabs)
@@ -24,8 +25,15 @@ def load(corpus, tokenizer):
     return v_size, t2v_map, corpus
 
 class Dataset:
-    def __init__(self):
-        pass
+    def __init__(self, corpus):
+        self.corpus = corpus
+        if isinstance(self.corpus, np.ndarray):
+            self.corpus = np.array(self.corpus)
 
-    def sample(self):
-        pass
+    def sample(self, batch_size=32, max_len=32):
+        idx = np.random.randint(0, len(self.corpus)-max_len, batch_size)
+        idx = np.arange(max_len)[None, :].repeat(batch_size, 0) + idx[:, None]
+        return self.corpus[idx]
+
+    def __len__(self):
+        return len(self.corpus)
