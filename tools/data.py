@@ -9,14 +9,17 @@ def load(corpus, tokenizer):
 
     # tokenization
     if tokenizer == 'character':
-        corpus = corpus.split()
+        import ipdb; ipdb.set_trace()
+        corpus = list(corpus)
         vocabs = sorted(list(set(corpus)))
         v_size = len(vocabs)
-        v2t_map = dict(zip(range(v_size), vocabs))
-        t2v_map = dict(zip(vocabs, range(v_size)))
+        v2t_map = dict(zip(vocabs, range(v_size)))
+        t2v_map = dict(zip(range(v_size), vocabs))
         corpus = [v2t_map[i] for i in corpus]
-    elif tokenizer = 'bpe':
+    elif tokenizer == 'bpe':
         raise NotImplementedError
+    else:
+        raise NotImplementedError(f"Incorrect tokenizer method: {tokenizer}")
 
     return v_size, t2v_map, corpus
 
