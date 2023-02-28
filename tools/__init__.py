@@ -1,4 +1,4 @@
-from .tool import load, Dataset
+from .data import load, Dataset
 
 __all__ = [
     'load', 
