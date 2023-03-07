@@ -27,7 +27,7 @@ def load(corpus, tokenizer):
 class Dataset:
     def __init__(self, corpus):
         self.corpus = corpus
-        if isinstance(self.corpus, np.ndarray):
+        if not isinstance(self.corpus, np.ndarray):
             self.corpus = np.array(self.corpus)
 
     def sample(self, batch_size=32, max_len=32):
