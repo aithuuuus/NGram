@@ -25,15 +25,31 @@ def load(corpus, tokenizer):
     return v_size, t2v_map, corpus
 
 class Dataset:
-    def __init__(self, corpus):
+    def __init__(self, corpus, batch_size, max_len):
         self.corpus = corpus
         if not isinstance(self.corpus, np.ndarray):
             self.corpus = np.array(self.corpus)
+        self.cnt = 0
+        self.len = len(corpus)
+        self.max_len = max_len
+        self.batch_size = batch_size
 
-    def sample(self, batch_size=32, max_len=32):
-        idx = np.random.randint(0, len(self.corpus)-max_len, batch_size)
-        idx = np.arange(max_len)[None, :].repeat(batch_size, 0) + idx[:, None]
+    def sample(self):
+        # random sample
+        idx = np.random.randint(0, len(self.corpus)-self.max_len, self.batch_size)
+        idx = np.arange(self.max_len)[None, :].repeat(self.batch_size, 0) + idx[:, None]
         return self.corpus[idx]
 
     def __len__(self):
-        return len(self.corpus)
+        return self.len
+
+    def __iter__(self):
+        self.cnt = 0
+        return self
+
+    def __next__(self):
+        # TODO change to iterate all over the dataset
+        if self.cnt < int(len(self)/32):
+            return self.sample()
+        else:
+            raise StopIteration

@@ -35,7 +35,7 @@ class Decoder(nn.Module):
         self.model = self.model.to(self.device)
 
     def forward(self, x):
-        '''Map: tensor(B, E) -> tensor(B, V)'''
+        '''Map: tensor(B, E) -> tensor(B, V), i.e. from embedding to prob w.r.t. words'''
         x = x.to(self.device)
         x = self.model(x)
         return x

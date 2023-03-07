@@ -5,12 +5,12 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from encoder import Encoder
-from decoder import Decoder
+from .encoder import Encoder
+from .decoder import Decoder
 
 
 class LM(nn.Module):
-    """Language model that predict next word based on previous N-1 gram"""
+    """Language model that predict next word based on previous N-1 grams(tokens)"""
     def __init__(
         self, 
         N, # Ngram
@@ -57,9 +57,8 @@ class LM(nn.Module):
 
 
     def forward(self, x):
-        '''Map: tensor(B, N) -> tensor(B, N, E)'''
+        '''Map: tensor(B, N) -> tensor(B, V)'''
         # one hot encoding
-        import ipdb; ipdb.set_trace()
         x = x.to(self.device)
 
         x = self.encoder(x)
