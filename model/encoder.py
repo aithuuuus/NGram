@@ -15,18 +15,23 @@ class Encoder(nn.Module):
         embedding_size, 
         hidden_sizes=[32], 
         activation=nn.ReLU,
-        device='cuda'
+        device='cuda', 
+        simple=True, # set this to true to return the one-hot
     ):
         super().__init__()
 
         assert N == 2, 'only support bigram now!'
 
         self.N = N
+        self.simple = simple
+
         self.v_size = v_size
         self.embedding_size = embedding_size
         self.hidden_sizes = hidden_sizes
         self.layers = [self.v_size] + hidden_sizes + [self.embedding_size]
         self.device = device
+        if self.simple:
+            return
 
         m = [
             [nn.Linear(i, j), activation()] for i, j in
@@ -44,6 +49,9 @@ class Encoder(nn.Module):
         # one hot encoding
         x = x.to(self.device)
         x = F.one_hot(x, self.v_size).float()
+
+        if self.simple:
+            return x
 
         x = self.model(x)
         return x

@@ -18,9 +18,9 @@ def parse():
     
     # training
     parser.add_argument('--epoch', type=int, default=20)
-    parser.add_argument('--lr', type=float, default=0.01)
+    parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--batch-size', type=int, default=32)
-    parser.add_argument('--verbose', type=int, default=100)
+    parser.add_argument('--verbose', type=int, default=10000)
     parser.add_argument('--device', default='cuda')
     
     # model
@@ -41,7 +41,8 @@ def train():
             embedding_size=args.embedding_size, 
             device=args.device)
     optim = torch.optim.Adam(lm.parameters(), lr=args.lr)
-    loss_fn = nn.MultiLabelSoftMarginLoss()
+    # loss_fn = nn.MultiLabelSoftMarginLoss()
+    loss_fn = F.cross_entropy
 
     for epoch in range(args.epoch):
         for cnt, batch in enumerate(iter(dataset)):
@@ -51,7 +52,8 @@ def train():
             for j in range(1, batch.shape[-1]):
                 # TODO Change to use mask
                 X = batch[:, 0:j]
-                Y = batch[:, [j]]
+                # Y = batch[:, [j]]
+                Y = batch[:, j]
                 X = torch.tensor(X).to(args.device)
                 Y = torch.tensor(Y).to(args.device)
                 pred = lm(X)

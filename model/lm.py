@@ -21,11 +21,16 @@ class LM(nn.Module):
         # decoder
         hidden_sizes=[32], 
         activation=nn.ReLU,
-        device='cuda'
+        device='cuda', 
+        simple=True, # set this to true to use simplified lm
     ):
         super().__init__()
 
         assert N == 2, 'only support bigram now!'
+
+        if simple:
+            embedding_size = v_size
+            hidden_sizes = []
 
         self.N = N
         self.v_size = v_size
@@ -33,6 +38,7 @@ class LM(nn.Module):
         self.hidden_sizes = hidden_sizes
         self.layers = [self.embedding_size] + hidden_sizes + [self.embedding_size]
         self.device = device
+        self.simple = simple
 
         m = [
             [nn.Linear(i, j), activation()] for i, j in
@@ -48,12 +54,14 @@ class LM(nn.Module):
                                embedding_size, 
                                hidden_sizes, 
                                activation, 
-                               device=device)
+                               device=device, 
+                               simple=simple)
         self.decoder = Decoder(v_size, 
                                embedding_size, 
                                hidden_sizes, 
                                activation, 
-                               device=device)
+                               device=device, 
+                               simple=simple)
 
 
     def forward(self, x):

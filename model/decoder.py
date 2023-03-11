@@ -13,7 +13,8 @@ class Decoder(nn.Module):
         embedding_size, 
         hidden_sizes=[32], 
         activation=nn.ReLU, 
-        device='cuda'
+        device='cuda', 
+        simple=False, 
     ):
         super().__init__()
 
@@ -22,6 +23,7 @@ class Decoder(nn.Module):
         self.hidden_sizes = hidden_sizes
         self.layers = [self.embedding_size] + hidden_sizes + [self.v_size]
         self.device = device
+        self.simple = simple
 
         m = [
             [nn.Linear(i, j), activation()] for i, j in
@@ -31,11 +33,15 @@ class Decoder(nn.Module):
         m = [i for l in m for i in l]
         m[-1] = nn.Softmax(dim=-1)
 
+        if self.simple:
+            m = [nn.Softmax(dim=-1)]
+
         self.model = nn.Sequential(*m)
         self.model = self.model.to(self.device)
 
     def forward(self, x):
         '''Map: tensor(B, E) -> tensor(B, V), i.e. from embedding to prob w.r.t. words'''
+
         x = x.to(self.device)
         x = self.model(x)
         return x
