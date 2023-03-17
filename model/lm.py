@@ -94,8 +94,9 @@ class LM(nn.Module):
 
         # TODO: use bigram for generating, should be
         for i in range(max_len):
-            token = self(generated[None, x_len+i-1].view(1, -1)).argmax(-1)
-            generated[x_len+i] = token[0]
+            token = self(generated[None, x_len+i-1].view(1, -1))
+            dist = torch.distributions.Categorical(token[0])
+            generated[x_len+i] = dist.sample()
         generated = self.decode_token(generated)
         return generated
 
