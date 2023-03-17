@@ -16,6 +16,7 @@ class LM(nn.Module):
         N, # Ngram
         v_size, 
         embedding_size, 
+        t2v_map, 
         # hidden layers used to predict the embedding of next 
         # word by previous embedding, also used in encoder and 
         # decoder
@@ -35,6 +36,7 @@ class LM(nn.Module):
         self.N = N
         self.v_size = v_size
         self.embedding_size = embedding_size
+        self.t2v_map = t2v_map
         self.hidden_sizes = hidden_sizes
         self.layers = [self.embedding_size] + hidden_sizes + [self.embedding_size]
         self.device = device
@@ -76,7 +78,26 @@ class LM(nn.Module):
         x = self.decoder(x)
         return x
 
+    def decode_token(self, x):
+        x = [self.t2v_map[i.item()] for i in x]
+        x = ''.join(x)
+        return x
 
+    def generate(self, x=None, max_len=64):
+        '''generate text, only one as batch size'''
+        if x == None:
+            # randomly sample the init
+            x = torch.randint(0, self.v_size, [1]).to(self.device).long()
+        x_len = len(x)
+        generated = torch.zeros(max_len).to(self.device).long()
+        generated = torch.cat([x, generated], 0)
+
+        # TODO: use bigram for generating, should be
+        for i in range(max_len):
+            token = self(generated[None, x_len+i-1].view(1, -1)).argmax(-1)
+            generated[x_len+i] = token[0]
+        generated = self.decode_token(generated)
+        return generated
 
 if __name__ == '__main__':
     x = torch.tensor([
@@ -85,3 +106,4 @@ if __name__ == '__main__':
         [0]])
     lm = LM(2, 2, 2)
     print(lm(x).shape)
+    lm.generate()

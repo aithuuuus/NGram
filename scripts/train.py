@@ -22,10 +22,12 @@ def parse():
     parser.add_argument('--batch-size', type=int, default=32)
     parser.add_argument('--verbose', type=int, default=10000)
     parser.add_argument('--device', default='cuda')
+    parser.add_argument('--test', action='store_true', default=False)
     
     # model
     parser.add_argument('--n-gram', type=int, default=2)
     parser.add_argument('--embedding-size', type=int, default=32)
+    parser.add_argument('--save-path', default="./model.pth")
 
     args = parser.parse_args()
     return args
@@ -39,6 +41,7 @@ def train():
     lm = LM(N=args.n_gram, 
             v_size=v_size, 
             embedding_size=args.embedding_size, 
+            t2v_map=t2v_map, 
             device=args.device)
     optim = torch.optim.Adam(lm.parameters(), lr=args.lr)
     # loss_fn = nn.MultiLabelSoftMarginLoss()
@@ -64,6 +67,12 @@ def train():
                 losses.append(loss.item())
             if cnt % args.verbose == 0:
                 print(f"[*] In epoch: {epoch}, loss: {np.mean(losses).item():.3f}")
+                lm = lm.eval()
+                generated = lm.generate()
+                print(f"\t Generated text: {generated}")
+                lm = lm.train()
+
+    torch.save(lm.state_dict(), args.save_path)
 
 if __name__ == '__main__':
     train()
