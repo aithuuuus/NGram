@@ -23,7 +23,7 @@ class LM(nn.Module):
         hidden_sizes=[32], 
         activation=nn.ReLU,
         device='cuda', 
-        simple=True, # set this to true to use simplified lm
+        simple=False, # set this to true to use simplified lm
     ):
         super().__init__()
 
@@ -41,7 +41,7 @@ class LM(nn.Module):
         t2v_map[self.v_size-1] = ''
         self.t2v_map = t2v_map
         self.hidden_sizes = hidden_sizes
-        self.layers = [self.embedding_size] + hidden_sizes + [self.embedding_size]
+        self.layers = [self.embedding_size*self.N] + hidden_sizes + [self.embedding_size]
         self.device = device
         self.simple = simple
 
@@ -74,8 +74,7 @@ class LM(nn.Module):
         x = x.to(self.device)
 
         x = self.encoder(x, mask)
-        # use mean pooling
-        x = x.mean(1)
+        x = x.view(x.shape[0], -1)
         x = self.model(x)
         x = self.decoder(x)
         return x

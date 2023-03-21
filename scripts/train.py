@@ -20,13 +20,13 @@ def parse():
     parser.add_argument('--epoch', type=int, default=20)
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--batch-size', type=int, default=32)
-    parser.add_argument('--verbose', type=int, default=10000)
+    parser.add_argument('--verbose', type=int, default=10)
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--test', action='store_true', default=False)
     
     # model
     parser.add_argument('--n-gram', type=int, default=5)
-    parser.add_argument('--embedding-size', type=int, default=32)
+    parser.add_argument('--embedding-size', type=int, default=64)
     parser.add_argument('--save-path', default="./model.pth")
 
     args = parser.parse_args()

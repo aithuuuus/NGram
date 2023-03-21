@@ -16,7 +16,7 @@ class Encoder(nn.Module):
         hidden_sizes=[32], 
         activation=nn.ReLU,
         device='cuda', 
-        simple=True, # set this to true to return the one-hot
+        simple=False, # set this to true to return the one-hot
     ):
         super().__init__()
 
@@ -45,6 +45,7 @@ class Encoder(nn.Module):
     def forward(self, x, mask):
         '''Map: tensor(B, N) -> tensor(B, N, E)'''
         # one hot encoding
+        # TODO: change to use embedding class in torch
         x = x.masked_fill(mask, self.v_size-1)
         x = x.to(self.device)
         x = F.one_hot(x, self.v_size).float()
