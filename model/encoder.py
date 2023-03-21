@@ -20,8 +20,6 @@ class Encoder(nn.Module):
     ):
         super().__init__()
 
-        assert N == 2, 'only support bigram now!'
-
         self.N = N
         self.simple = simple
 
@@ -44,18 +42,16 @@ class Encoder(nn.Module):
         self.model = self.model.to(self.device)
 
 
-    def forward(self, x):
+    def forward(self, x, mask):
         '''Map: tensor(B, N) -> tensor(B, N, E)'''
         # one hot encoding
+        x = x.masked_fill(mask, self.v_size-1)
         x = x.to(self.device)
         x = F.one_hot(x, self.v_size).float()
 
-        if self.simple:
-            return x
-
-        x = self.model(x)
+        if not self.simple:
+            x = self.model(x)
         return x
-
 
 
 if __name__ == '__main__':

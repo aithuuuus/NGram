@@ -27,7 +27,8 @@ class LM(nn.Module):
     ):
         super().__init__()
 
-        assert N == 2, 'only support bigram now!'
+        # include the None
+        v_size = v_size + 1
 
         if simple:
             embedding_size = v_size
@@ -36,6 +37,8 @@ class LM(nn.Module):
         self.N = N
         self.v_size = v_size
         self.embedding_size = embedding_size
+        # TODO: change more refined treatment
+        t2v_map[self.v_size-1] = ''
         self.t2v_map = t2v_map
         self.hidden_sizes = hidden_sizes
         self.layers = [self.embedding_size] + hidden_sizes + [self.embedding_size]
@@ -66,12 +69,11 @@ class LM(nn.Module):
                                simple=simple)
 
 
-    def forward(self, x):
+    def forward(self, x, mask):
         '''Map: tensor(B, N) -> tensor(B, V)'''
-        # one hot encoding
         x = x.to(self.device)
 
-        x = self.encoder(x)
+        x = self.encoder(x, mask)
         # use mean pooling
         x = x.mean(1)
         x = self.model(x)
@@ -79,6 +81,8 @@ class LM(nn.Module):
         return x
 
     def decode_token(self, x):
+        assert x.shape[0] == 1, "TODO: add to multi-batch sampling"
+        x = x[0]
         x = [self.t2v_map[i.item()] for i in x]
         x = ''.join(x)
         return x
@@ -87,16 +91,31 @@ class LM(nn.Module):
         '''generate text, only one as batch size'''
         if x == None:
             # randomly sample the init
-            x = torch.randint(0, self.v_size, [1]).to(self.device).long()
-        x_len = len(x)
-        generated = torch.zeros(max_len).to(self.device).long()
-        generated = torch.cat([x, generated], 0)
+            x = torch.randint(0, self.v_size-1, [1]).to(self.device).long()
+            x = x.view(-1, x.shape[0])
 
-        # TODO: use bigram for generating, should be
-        for i in range(max_len):
-            token = self(generated[None, x_len+i-1].view(1, -1))
-            dist = torch.distributions.Categorical(token[0])
-            generated[x_len+i] = dist.sample()
+        # Truncate the sequence
+        if x.shape[-1] >= self.N-1:
+            x = x[:, x.shape[1]-self.N+1: x.shape[1]]
+
+        x_len = x.shape[-1]
+        assert x_len + max_len > self.N, "TODO"
+        generated = torch.zeros(max_len).to(self.device).long().view(-1, max_len)
+        generated = torch.cat([x, generated], -1)
+        mask = torch.ones([x.shape[0], self.N], dtype=torch.bool).to(self.device)
+        mask[:, :x_len] = False
+
+        for i in range(x_len, max_len+x_len):
+            if i < self.N:
+                mask[:, i-1] = False
+
+            if i < self.N:
+                i1, i2 = 0, self.N
+            else:
+                i1, i2 = i-self.N+1, i+1
+            token = self(generated[:, i1: i2], mask)
+            dist = torch.distributions.Categorical(token)
+            generated[:, i] = dist.sample()
         generated = self.decode_token(generated)
         return generated
 

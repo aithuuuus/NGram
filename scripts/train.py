@@ -25,7 +25,7 @@ def parse():
     parser.add_argument('--test', action='store_true', default=False)
     
     # model
-    parser.add_argument('--n-gram', type=int, default=2)
+    parser.add_argument('--n-gram', type=int, default=5)
     parser.add_argument('--embedding-size', type=int, default=32)
     parser.add_argument('--save-path', default="./model.pth")
 
@@ -52,14 +52,12 @@ def train():
             # iterate to use sub-sequence of the origin sequence to 
             # predict the next word
             losses = []
+            batch = torch.tensor(batch).to(args.device)
+            mask = torch.ones_like(batch, dtype=torch.bool, device=batch.device)
             for j in range(1, batch.shape[-1]):
-                # TODO Change to use mask
-                X = batch[:, 0:j]
-                # Y = batch[:, [j]]
+                mask[:, j-1] = False
                 Y = batch[:, j]
-                X = torch.tensor(X).to(args.device)
-                Y = torch.tensor(Y).to(args.device)
-                pred = lm(X)
+                pred = lm(batch, mask)
                 loss = loss_fn(pred, Y)
                 optim.zero_grad()
                 loss.backward()
