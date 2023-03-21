@@ -13,7 +13,7 @@ def parse():
     parser = argparse.ArgumentParser(
         description="Train the Ngram LM")
     # data
-    parser.add_argument('--corpus', default="input.txt")
+    parser.add_argument('--corpus', default="alice_in_wonderland.txt")
     parser.add_argument('--tokenizer', default='character')
     
     # training
@@ -25,7 +25,7 @@ def parse():
     parser.add_argument('--test', action='store_true', default=False)
 
     # model
-    parser.add_argument('--n-gram', type=int, default=2)
+    parser.add_argument('--n-gram', type=int, default=5)
     parser.add_argument('--embedding-size', type=int, default=64)
     parser.add_argument('--save-path', default="./model.pth")
 

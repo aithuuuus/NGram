@@ -79,6 +79,7 @@ class LM(nn.Module):
         x = self.encoder(x, mask)
         x = x.mean(1)
         x = self.model(x)
+        x = self.decoder(x)
         return x
 
     def decode_token(self, x):
@@ -88,7 +89,7 @@ class LM(nn.Module):
         x = ''.join(x)
         return x
 
-    def generate(self, x=None, max_len=64):
+    def generate(self, x=None, max_len=128):
         '''generate text, only one as batch size'''
         if x == None:
             # randomly sample the init
@@ -115,8 +116,8 @@ class LM(nn.Module):
             else:
                 i1, i2 = i-self.N+1, i+1
             token = self(generated[:, i1: i2], mask)
-            token = self.decoder(token)
-            dist = torch.distributions.Categorical(token)
+            probs = F.softmax(token, -1)
+            dist = torch.distributions.Categorical(probs)
             generated[:, i] = dist.sample()
         generated = self.decode_token(generated)
         return generated
