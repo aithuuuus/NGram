@@ -5,7 +5,6 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-
 class Encoder(nn.Module):
     """MLP That map encoded tensor of natures numbers into word embeddings"""
     def __init__(
@@ -13,7 +12,7 @@ class Encoder(nn.Module):
         N, # Ngram
         v_size, 
         embedding_size, 
-        hidden_sizes=[32], 
+        hidden_sizes=[], 
         activation=nn.ReLU,
         device='cuda', 
         simple=False, # set this to true to return the one-hot
@@ -26,8 +25,11 @@ class Encoder(nn.Module):
         self.v_size = v_size
         self.embedding_size = embedding_size
         self.hidden_sizes = hidden_sizes
-        self.layers = [self.v_size] + hidden_sizes + [self.embedding_size]
+        self.layers = [self.embedding_size] + hidden_sizes + [self.embedding_size]
         self.device = device
+        self.embedding = nn.Embedding(v_size, embedding_size).to(self.device)
+        # The brute-force position embedding
+        self.position_embedding = nn.Embedding(N, embedding_size).to(self.device)
         if self.simple:
             return
 
@@ -45,10 +47,11 @@ class Encoder(nn.Module):
     def forward(self, x, mask):
         '''Map: tensor(B, N) -> tensor(B, N, E)'''
         # one hot encoding
-        # TODO: change to use embedding class in torch
         x = x.masked_fill(mask, self.v_size-1)
         x = x.to(self.device)
-        x = F.one_hot(x, self.v_size).float()
+        x = self.embedding(x)
+        po = self.position_embedding(torch.arange(x.shape[1]).to(self.device))[None,  :]
+        x = x + po
 
         if not self.simple:
             x = self.model(x)
