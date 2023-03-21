@@ -20,7 +20,7 @@ class LM(nn.Module):
         # hidden layers used to predict the embedding of next 
         # word by previous embedding, also used in encoder and 
         # decoder
-        hidden_sizes=[32], 
+        hidden_sizes=[], 
         activation=nn.ReLU,
         device='cuda', 
         simple=False, # set this to true to use simplified lm
@@ -41,7 +41,7 @@ class LM(nn.Module):
         t2v_map[self.v_size-1] = ''
         self.t2v_map = t2v_map
         self.hidden_sizes = hidden_sizes
-        self.layers = [self.embedding_size*self.N] + hidden_sizes + [self.embedding_size]
+        self.layers = [self.embedding_size] + hidden_sizes + [self.embedding_size]
         self.device = device
         self.simple = simple
 
@@ -52,7 +52,7 @@ class LM(nn.Module):
         # from https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
         m = [i for l in m for i in l]
 
-        self.model = nn.Sequential(*m[:-1])
+        self.model = nn.Sequential(*m)
         self.model = self.model.to(self.device)
 
         self.encoder = Encoder(N, v_size, 
@@ -74,7 +74,7 @@ class LM(nn.Module):
         x = x.to(self.device)
 
         x = self.encoder(x, mask)
-        x = x.view(x.shape[0], -1)
+        x = x.mean(1)
         x = self.model(x)
         x = self.decoder(x)
         return x

@@ -40,7 +40,7 @@ class Encoder(nn.Module):
         # from https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
         m = [i for l in m for i in l]
 
-        self.model = nn.Sequential(*m[:-1])
+        self.model = nn.Sequential(*m)
         self.model = self.model.to(self.device)
 
 
