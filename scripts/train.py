@@ -13,19 +13,19 @@ def parse():
     parser = argparse.ArgumentParser(
         description="Train the Ngram LM")
     # data
-    parser.add_argument('--corpus', default="alice_in_wonderland.txt")
+    parser.add_argument('--corpus', default="input.txt")
     parser.add_argument('--tokenizer', default='character')
     
     # training
     parser.add_argument('--epoch', type=int, default=20)
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--batch-size', type=int, default=32)
-    parser.add_argument('--verbose', type=int, default=10)
+    parser.add_argument('--verbose', type=int, default=1000)
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--test', action='store_true', default=False)
-    
+
     # model
-    parser.add_argument('--n-gram', type=int, default=5)
+    parser.add_argument('--n-gram', type=int, default=2)
     parser.add_argument('--embedding-size', type=int, default=64)
     parser.add_argument('--save-path', default="./model.pth")
 
@@ -42,8 +42,9 @@ def train():
             v_size=v_size, 
             embedding_size=args.embedding_size, 
             t2v_map=t2v_map, 
-            device=args.device)
-    optim = torch.optim.Adam(lm.parameters(), lr=args.lr)
+            device=args.device, 
+            simple=args.test)
+    optim = torch.optim.AdamW(lm.parameters(), lr=args.lr)
     # loss_fn = nn.MultiLabelSoftMarginLoss()
     loss_fn = F.cross_entropy
 

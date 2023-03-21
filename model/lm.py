@@ -52,8 +52,11 @@ class LM(nn.Module):
         # from https://stackoverflow.com/questions/952914/how-do-i-make-a-flat-list-out-of-a-list-of-lists
         m = [i for l in m for i in l]
 
-        self.model = nn.Sequential(*m)
-        self.model = self.model.to(self.device)
+        if simple:
+            self.model = lambda x: x
+        else:
+            self.model = nn.Sequential(*m)
+            self.model = self.model.to(self.device)
 
         self.encoder = Encoder(N, v_size, 
                                embedding_size, 
@@ -76,7 +79,6 @@ class LM(nn.Module):
         x = self.encoder(x, mask)
         x = x.mean(1)
         x = self.model(x)
-        x = self.decoder(x)
         return x
 
     def decode_token(self, x):
@@ -113,6 +115,7 @@ class LM(nn.Module):
             else:
                 i1, i2 = i-self.N+1, i+1
             token = self(generated[:, i1: i2], mask)
+            token = self.decoder(token)
             dist = torch.distributions.Categorical(token)
             generated[:, i] = dist.sample()
         generated = self.decode_token(generated)
