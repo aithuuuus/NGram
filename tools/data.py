@@ -1,12 +1,18 @@
 import numpy as np
 
+from tokenizers import Tokenizer
+from tokenizers.models import BPE
+from tokenizers.trainers import BpeTrainer
+from tokenizers.pre_tokenizers import Whitespace
+
 def load(corpus, tokenizer):
     '''
     load and prepare the training dataset
     return: size of vocabularies, dict of token to vocab, tokenized data
     '''
     # load the corpus
-    with open(f'data/{corpus}', 'r') as f:
+    file = f'data/{corpus}'
+    with open(file, 'r') as f:
         corpus = f.read()
 
     # tokenization
@@ -17,12 +23,18 @@ def load(corpus, tokenizer):
         v2t_map = dict(zip(vocabs, range(v_size)))
         t2v_map = dict(zip(range(v_size), vocabs))
         corpus = [v2t_map[i] for i in corpus]
+        return v_size, t2v_map, corpus
     elif tokenizer == 'bpe':
-        raise NotImplementedError
+        # we directly use the tokenizer from transformers
+        tokenizer = Tokenizer(BPE(unk_token='[UNK]'))
+        trainer = BpeTrainer(special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]"])
+        tokenizer.pre_tokenizer = Whitespace()
+        tokenizer.train([file], trainer)
+        corpus = tokenizer.encode(corpus)
+        return tokenizer.get_vocab_size(), tokenizer, corpus.ids
     else:
         raise NotImplementedError(f"Incorrect tokenizer method: {tokenizer}")
 
-    return v_size, t2v_map, corpus
 
 class Dataset:
     def __init__(self, corpus, batch_size, max_len):

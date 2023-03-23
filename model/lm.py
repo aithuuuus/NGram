@@ -27,8 +27,11 @@ class LM(nn.Module):
     ):
         super().__init__()
 
-        # include the None
-        v_size = v_size + 1
+        # TODO: change more refined treatment
+        if isinstance(t2v_map, dict):
+            # include the None
+            v_size = v_size + 1
+            t2v_map[self.v_size-1] = ''
 
         if simple:
             embedding_size = v_size
@@ -37,8 +40,6 @@ class LM(nn.Module):
         self.N = N
         self.v_size = v_size
         self.embedding_size = embedding_size
-        # TODO: change more refined treatment
-        t2v_map[self.v_size-1] = ''
         self.t2v_map = t2v_map
         self.hidden_sizes = hidden_sizes
         self.layers = [self.embedding_size] + hidden_sizes + [self.embedding_size]
