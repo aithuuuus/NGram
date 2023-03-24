@@ -86,11 +86,14 @@ class LM(nn.Module):
     def decode_token(self, x):
         assert x.shape[0] == 1, "TODO: add to multi-batch sampling"
         x = x[0]
-        x = [self.t2v_map[i.item()] for i in x]
-        x = ''.join(x)
+        if isinstance(self.t2v_map, dict):
+            x = [self.t2v_map[i.item()] for i in x]
+            x = ''.join(x)
+        else:
+            x = self.t2v_map.decode(x.tolist())
         return x
 
-    def generate(self, x=None, max_len=128):
+    def generate(self, x=None, max_len=32):
         '''generate text, only one as batch size'''
         if x == None:
             # randomly sample the init

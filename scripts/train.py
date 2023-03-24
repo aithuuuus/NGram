@@ -37,7 +37,6 @@ def train():
     # prepare
     args = parse()
     v_size, t2v_map, corpus = load(args.corpus, args.tokenizer)
-    import ipdb; ipdb.set_trace()
     dataset = Dataset(corpus, args.batch_size, args.n_gram)
     lm = LM(N=args.n_gram, 
             v_size=v_size, 
