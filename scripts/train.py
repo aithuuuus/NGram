@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import numpy as np
 
@@ -27,7 +28,7 @@ def parse():
     # model
     parser.add_argument('--n-gram', type=int, default=5)
     parser.add_argument('--embedding-size', type=int, default=64)
-    parser.add_argument('--save-path', default="./model.pth")
+    parser.add_argument('--save-path', default="./")
 
     args = parser.parse_args()
     return args
@@ -70,8 +71,9 @@ def train():
                 generated = lm.generate()
                 print(f"\t Generated text: {generated}")
                 lm = lm.train()
+        torch.save(lm.state_dict(), os.path.join(args.save_path, f'model-{epoch}.pth'))
 
-    torch.save(lm.state_dict(), args.save_path)
+    torch.save(lm.state_dict(), os.path.join(args.save_path, f'model.pth'))
 
 if __name__ == '__main__':
     train()
