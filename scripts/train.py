@@ -7,6 +7,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+from torch.utils.tensorboard import SummaryWriter
+
 from tools import load, Dataset
 from model import LM
 
@@ -28,7 +30,7 @@ def parse():
     # model
     parser.add_argument('--n-gram', type=int, default=5)
     parser.add_argument('--embedding-size', type=int, default=64)
-    parser.add_argument('--save-path', default="./")
+    parser.add_argument('--save-path', default="./log")
 
     args = parser.parse_args()
     return args
@@ -37,6 +39,7 @@ def train():
     '''train and save the model'''
     # prepare
     args = parse()
+    writer = SummaryWriter(args.save_path)
     v_size, t2v_map, corpus = load(args.corpus, args.tokenizer)
     dataset = Dataset(corpus, args.batch_size, args.n_gram)
     lm = LM(N=args.n_gram, 
@@ -67,6 +70,7 @@ def train():
                 losses.append(loss.item())
             if cnt % args.verbose == 0:
                 print(f"[*] In epoch: {epoch}, loss: {np.mean(losses).item():.3f}")
+                writer.add_scalar("loss", np.mean(losses).item())
                 lm = lm.eval()
                 generated = lm.generate()
                 print(f"\t Generated text: {generated}")
