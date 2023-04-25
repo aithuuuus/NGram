@@ -45,6 +45,7 @@ def train():
     writer = SummaryWriter(args.save_path)
     v_size, t2v_map, corpus = load(args.corpus, args.tokenizer)
     dataset = Dataset(corpus, args.batch_size, args.n_gram)
+    t2v_map.save(os.path.join(args.save_path, "tokenizer.json"))
     lm = LM(N=args.n_gram, 
             v_size=v_size, 
             embedding_size=args.embedding_size, 
