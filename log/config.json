@@ -1,0 +1,1 @@
+{"corpus": "alice_in_wonderland.txt", "tokenizer": "bpe", "epoch": 200, "lr": 0.001, "batch_size": 32, "verbose": 1000, "device": "cuda", "test": false, "n_gram": 8, "embedding_size": 64, "save_path": "./log"}

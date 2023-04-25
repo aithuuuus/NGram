@@ -42,6 +42,7 @@ def train():
     args = parse()
     with open(os.path.join(args.save_path, "config.json"), 'w') as f:
         json.dump(args.__dict__, f)
+    import ipdb; ipdb.set_trace()
     writer = SummaryWriter(args.save_path)
     v_size, t2v_map, corpus = load(args.corpus, args.tokenizer)
     dataset = Dataset(corpus, args.batch_size, args.n_gram)
