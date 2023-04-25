@@ -69,7 +69,7 @@ def train():
                 optim.step()
                 losses.append(loss.item())
             if cnt % args.verbose == 0:
-                print(f"[*] In epoch: {epoch}, loss: {np.mean(losses).item():.3f}")
+                print(f"[*] In epoch: {epoch}, cnt: {cnt}, loss: {np.mean(losses).item():.3f}")
                 writer.add_scalar("loss", np.mean(losses).item())
                 lm = lm.eval()
                 generated = lm.generate()

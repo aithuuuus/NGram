@@ -61,7 +61,9 @@ class Dataset:
 
     def __next__(self):
         # TODO change to iterate all over the dataset
+        # print(f"CNT: {self.cnt}, MAX: {int(len(self)/32)}")
         if self.cnt < int(len(self)/32):
+            self.cnt += 1
             return self.sample()
         else:
             raise StopIteration
