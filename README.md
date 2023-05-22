@@ -1,9 +1,10 @@
 # Naive GPT
 
-This is a text-generating model (autoregressive) without the use of transformers. We just use a simple MLP.
+This is a text-generating model trained with auto-regressive.
 
 # TODO
-May add wandb log.
+* May add wandb log.
+* Change to use transformers.
 
 # change log
 ## `6511dd97e0ef217a9a`
